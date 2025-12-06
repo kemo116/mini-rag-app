@@ -42,3 +42,8 @@ Set your environment variables in the `.env` file.like `OPENAI_API_KEY` VALUE
 ### to run the fastapi server 
 ```$ uvicorn main:app --reload --host 0.0.0.0 --port 5000```
 
+
+### download the postman collection from 
+
+``` https://.postman.co/workspace/shoppingCart~d86c44b2-c31a-4ef3-ac01-89c526ad10c2/collection/33240565-81b8823d-300d-4b63-8c4d-be36ad6b0512?action=share&creator=33240565 ```
+
