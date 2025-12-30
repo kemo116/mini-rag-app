@@ -6,3 +6,5 @@ class ResponseSignalEnum(str, Enum):
     FILE_SIZE_EXCEEDED = "file_size_exceeded"
     FILE_UPLAOD_SUCCESS = "success"
     FILE_UPLOAD_FAILURE = "failure"
+    processing_failed = "processing failed"
+    processing_success = "processing success"
