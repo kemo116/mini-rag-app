@@ -47,3 +47,11 @@ Set your environment variables in the `.env` file.like `OPENAI_API_KEY` VALUE
 
 ``` https://.postman.co/workspace/shoppingCart~d86c44b2-c31a-4ef3-ac01-89c526ad10c2/collection/33240565-81b8823d-300d-4b63-8c4d-be36ad6b0512?action=share&creator=33240565 ```
 
+
+## Run Docker Compose Services
+
+```bash
+$ cd docker
+$ cp .env.example .env
+
+- update `.env` with your credentials
