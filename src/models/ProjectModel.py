@@ -16,7 +16,7 @@ class ProjectModel(BaseDataModel):
         await instance.init_collection()
         return instance
 
-        
+
     async def init_collection(self):
         all_collections = await self.db_client.list_collection_names()
         if DataBaseEnum.Collection_Projects.value not in all_collections:
@@ -29,9 +29,10 @@ class ProjectModel(BaseDataModel):
                     name=index["name"],
                     unique= index["unique"]
                 )
+                
     async def create_project(self, project:Project):
         result = await self.collection.insert_one(project.dict(by_alias=True, exclude_unset=True))
-        project._id = result.inserted_id
+        project.id = result.inserted_id
         return project
     async def get_project_or_create_one(self, project_id:str):
         
