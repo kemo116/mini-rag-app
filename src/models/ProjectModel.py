@@ -1,6 +1,7 @@
 from .BaseDataModel import BaseDataModel
 from .db_schemes import Project
 from .enums.DataBaseEnum import DataBaseEnum
+from bson import ObjectId
 from typing import Optional
 from pymongo import InsertOne
 from .db_schemes import DataChunk
@@ -34,6 +35,12 @@ class ProjectModel(BaseDataModel):
         result = await self.collection.insert_one(project.dict(by_alias=True, exclude_unset=True))
         project.id = result.inserted_id
         return project
+    
+    async def update_project(self, project_id: ObjectId, update_data: dict):
+        return await self.collection.update_one(
+            {"_id": project_id},
+            {"$set": update_data}
+        )
     async def get_project_or_create_one(self, project_id:str):
         
         record = await self.collection.find_one({
@@ -69,4 +76,3 @@ class ProjectModel(BaseDataModel):
             ]
             await self.collection.bulk_write(operations)
         return len(chunks)
-    

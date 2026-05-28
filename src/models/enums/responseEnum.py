@@ -8,3 +8,5 @@ class ResponseSignalEnum(str, Enum):
     FILE_UPLOAD_FAILURE = "failure"
     processing_failed = "processing failed"
     processing_success = "processing success"
+    NO_FILES_ERROR = "not_found_files"
+    FILE_ID_ERROR = "NO_FILE_FOUND_WITH_THIS_ID"

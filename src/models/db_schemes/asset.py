@@ -24,7 +24,7 @@ class Asset(BaseModel):
                     # ("chunk_order", 1)
                 ],
                 "name": "asset_project_id_index_1",
-                "unique": True
+                "unique": False
             },
             {
                 "key":[
