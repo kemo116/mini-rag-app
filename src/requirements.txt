@@ -5,6 +5,7 @@ python-dotenv==1.2.1
 pydantic-settings==2.12.0
 aiofiles==25.1.0
 langchain==0.1.20
-PyMuPDF==1.24.3
+PyMuPDF
 motor
-openai==1.35.13
+openai
+cohere
