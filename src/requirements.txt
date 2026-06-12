@@ -9,3 +9,4 @@ PyMuPDF
 motor
 openai
 cohere
+qdrant-client
