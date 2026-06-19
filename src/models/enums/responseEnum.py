@@ -13,3 +13,6 @@ class ResponseSignalEnum(str, Enum):
     PROJECT_NOT_FOUND_ERROR = "PROJECT_NOT_FOUND"
     INSERT_INTO_VECTORDB_ERROR = "insert_into_vectordb_error"
     INSERT_INTO_VECTORDB_SUCCESS = "insert_into_vectordb_success"
+    VECTORDB_COLLECTION_RETRIEVED = "vectordb_collection_retrieved"
+    SEARCH_VECTORDB_ERROR = "search_vectordb_error"
+    SEARCH_VECTORDB_SUCCESS = "search_vectordb_success"

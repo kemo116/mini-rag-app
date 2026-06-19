@@ -4,6 +4,7 @@ from models.db_schemes.data_chunk import DataChunk
 from stores.llm.LLMenums import DocumentTypeEnum
 from .BaseController import BaseController
 from models.db_schemes import Project
+import json
 
 class NLPController(BaseController):
     def __init__(self, vectordb_client, generation_client, embedding_client):
@@ -25,9 +26,11 @@ class NLPController(BaseController):
         collection_name = self.create_collection_name(project_id = project.project_id)
         collection_info = self.vectordb_client.get_collection_info(collection_name= collection_name)
 
-        return collection_info
+        return json.loads(
+            json.dumps(collection_info, default= lambda x:x.__dict__)
+        )
     
-    def index_into_vector_db(self, project: Project, chunks: List[DataChunk], do_reset: bool = False):
+    def index_into_vector_db(self, project: Project, chunks: List[DataChunk], chunks_ids: list[int] ,do_reset: bool = False):
         
         # step1 : get collection name
         collection_name = self.create_collection_name(project_id = project.project_id)
@@ -56,9 +59,32 @@ class NLPController(BaseController):
             texts = texts,
             vectors = vectors, 
             metadata = metadata,
-
+            record_ids = chunks_ids
         )
 
         return True
+    
+
+    def search_vector_db_collection(self, project: Project, text: str, limit: int = 10):
+
+        collection_name = self.create_collection_name(project_id = project.project_id)
+
+        vector = self.embedding_client.embed_text(text, document_type = DocumentTypeEnum.QUERY.value)
+
+        if not vector or len(vector) ==0:
+            return False
+        
+
+        search_results = self.vectordb_client.search_by_vector(
+            collection_name=collection_name,
+            vector=vector,
+            limit=limit
+        )
+        if not search_results:
+            return False
+        
+        return json.loads(
+            json.dumps(search_results, default= lambda x:x.__dict__)
+        )
 
 

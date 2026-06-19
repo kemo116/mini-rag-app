@@ -15,7 +15,7 @@ class CohereEnums(Enum):
     USER = "USER"
     ASSISTANT = "CHATBOT" 
 
-    DOCUMENT = "search_doucment"
+    DOCUMENT = "search_document"
     QUERY = "search_query"
 
 

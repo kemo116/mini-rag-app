@@ -75,6 +75,7 @@ class QdrantDB(VectorDBInterface):
                 collection_name=collection_name,
                 records=[
                     models.Record(
+                        id = [record_id],
                         vector=vector,
                         payload={
                             "text": text,
@@ -103,10 +104,11 @@ class QdrantDB(VectorDBInterface):
             batch_end = i + batch_size
             batch_texts = vectors[i:]
             batch_metadata = metadata[i:batch_end]
-
+            batch_record_ids = record_ids[i:batch_end]
             batch_records = [
 
                 models.Record(
+                    id = batch_record_ids[x],
                     vector=batch_texts[x],
                     payload={
                         "text": texts[x],

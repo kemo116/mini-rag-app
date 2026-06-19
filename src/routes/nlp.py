@@ -1,11 +1,12 @@
 import logging 
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, APIRouter, status, Depends, UploadFile, Request
-from routes.schemas.nlp import PushRequest
+from routes.schemas.nlp import PushRequest, SearchRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
 from controllers import NLPController
 from models import ResponseSignalEnum
+import json
 logger = logging.getLogger('uvicorn.error')
 
 
@@ -23,7 +24,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
 
 
     project_model = await ProjectModel.create_instance(
-            request.app.state.db_client
+            request.app.db_client
         
         )
     
@@ -43,8 +44,8 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
             }
         )
     
-    nlp_controller = NLPController.create_instance(
-           vectordb_client = request.app.state.db_client,
+    nlp_controller = NLPController(
+           vectordb_client = request.app.vector_db_client,
            generation_client = request.app.generation_client,
            embedding_client = request.app.embedding_client,
         )
@@ -52,7 +53,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
     has_records = True
     page_no = 1
     inserted_items_count = 0
-
+    idx = 0
     while has_records:
         page_chunks = await chunk_model.get_project_chunks(
             project_id = project.id, page_no=page_no
@@ -64,10 +65,14 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
             has_records = False
             break
 
+        chunk_ids = list(range(idx, idx+len(page_chunks)))
+        idx += len(page_chunks)
+
         is_inserted = nlp_controller.index_into_vector_db(
             project = project,
             chunks = page_chunks,
-            do_reset = push_request.do_reset,
+            chunks_ids = chunk_ids,
+            do_reset = push_request.do_request,
         )
 
         if not is_inserted:
@@ -96,5 +101,75 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
 
     
 
+@nlp_router.get("/index/info/{project_id}")
+async def get_project_index_info(request: Request, project_id: str):
+    project_model = await ProjectModel.create_instance(
+        request.app.db_client
+    
+    )
 
+    project = await project_model.get_project_or_create_one(
+            project_id= project_id
+        
+    )
+
+    nlp_controller = NLPController(
+           vectordb_client = request.app.vector_db_client,
+           generation_client = request.app.generation_client,
+           embedding_client = request.app.embedding_client,
+    )
+
+    collection_info = nlp_controller.get_vector_db_collection_info(
+        project = project,
+    )
+
+    return JSONResponse(
+        status_code= status.HTTP_200_OK,
+        content= {
+            "signal": ResponseSignalEnum.VECTORDB_COLLECTION_RETRIEVED.value,
+            "collection_info": collection_info,
+        }
+    ) 
+
+
+
+@nlp_router.post("/index/search/{project_id}")
+async def search_index(request: Request, project_id: str, search_request: SearchRequest):
+
+    project_model = await ProjectModel.create_instance(
+        request.app.db_client
+    
+    )
+
+    project = await project_model.get_project_or_create_one(
+            project_id= project_id
+        
+    )
+
+    nlp_controller = NLPController(
+           vectordb_client = request.app.vector_db_client,
+           generation_client = request.app.generation_client,
+           embedding_client = request.app.embedding_client,
+    )
+
+    search_results = nlp_controller.search_vector_db_collection(
+        project = project,
+        text = search_request.text,
+        limit = search_request.limit,
+    )
+
+    if not search_results:
+        return JSONResponse(
+            status_code= status.HTTP_400_INTERNAL_SERVER_ERROR,
+            content= {
+                "signal": ResponseSignalEnum.SEARCH_VECTORDB_ERROR.value,
+            }
+        )
+    
+    return JSONResponse(
+            content= {
+                "signal": ResponseSignalEnum.SEARCH_VECTORDB_SUCCESS.value,
+                "search_results": search_results,
+            }
+        )
 
