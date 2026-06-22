@@ -15,7 +15,8 @@ class Settings(BaseSettings):
     COHERE_API_KEY: str = None
     OPENAI_API_URL: str = None
     OPENAI_API_KEY: str = None
-    GEMINI_API_KEY: str = None # <-- Added
+    GEMINI_API_KEY: str = None
+    GROQ_API_KEY: str = None
 
     GENERATION_MODEL_ID: str = None
     EMBEDDING_MODEL_ID: str = None
