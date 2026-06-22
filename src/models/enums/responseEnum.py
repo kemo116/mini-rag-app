@@ -16,3 +16,5 @@ class ResponseSignalEnum(str, Enum):
     VECTORDB_COLLECTION_RETRIEVED = "vectordb_collection_retrieved"
     SEARCH_VECTORDB_ERROR = "search_vectordb_error"
     SEARCH_VECTORDB_SUCCESS = "search_vectordb_success"
+    ANSWER_RAG_ERROR = "answer_rag_error"
+    ANSWER_RAG_SUCCESS = "answer_rag_success"

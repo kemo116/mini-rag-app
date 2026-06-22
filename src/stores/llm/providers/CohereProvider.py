@@ -25,6 +25,7 @@ class CohereProvider(LLMInterface):
             api_key=self.api_key,
             base_url=self.api_url if self.api_url else None
         )
+        self.enums= CohereEnums
 
         self.logger = logging.getLogger(__name__)
     

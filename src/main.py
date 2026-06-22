@@ -5,6 +5,7 @@ from routes import data, nlp, base
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
 from stores.llm.LLMProviderFactory import LLMProviderFactory
+from stores.llm.templates.template_parser import TemplateParser
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
 
 # 1. Define the lifespan context manager
@@ -26,7 +27,8 @@ async def lifespan(app: FastAPI):
 
     app.vector_db_client = vector_db_provider_factory.create(provider=settings.VECTOR_DB_BACKEND)
     app.vector_db_client.connect()
-
+    app.template_parser = TemplateParser(default_language=settings.PRIMARY_LANG, language=settings.DEFAULT_LANG)
+    
     yield  # <-- This tells FastAPI the app is ready and to start accepting requests
 
     # --- SHUTDOWN CODE ---
