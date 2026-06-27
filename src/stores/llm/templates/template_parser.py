@@ -12,12 +12,13 @@ class TemplateParser:
     def set_language(self, language: str):
         if not language:
             self.language = self.default_language
+            return
 
         language_path = os.path.join(self.current_path, "locales", language)
-        
+
         if os.path.exists(language_path):
             self.language = language
-        else: 
+        else:
             self.language = self.default_language
 
 
@@ -26,15 +27,15 @@ class TemplateParser:
         if not group or not key:
             return None
         
-        group_path = os.path.join(self.current_path, "locales", self.language, f"{group}.py")
         target_language = self.language
+        group_path = os.path.join(self.current_path, "locales", target_language, f"{group}.py")
+
         if not os.path.exists(group_path):
-            group_path = os.path.join(self.current_path, "locales", self.default_language, f"{group}.py")
+            target_language = self.default_language
+            group_path = os.path.join(self.current_path, "locales", target_language, f"{group}.py")
 
         if not os.path.exists(group_path):
             return None
-        
-        # import group modele
 
         module = __import__(f"stores.llm.templates.locales.{target_language}.{group}", fromlist={group})
 

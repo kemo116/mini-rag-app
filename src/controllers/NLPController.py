@@ -87,7 +87,12 @@ class NLPController(BaseController):
         return search_results
 
 
-    def answer_rag_question(self, project: Project, query: str, limit: int = 10):
+    def detect_language(self, text: str) -> str:
+        if any('؀' <= ch <= 'ۿ' for ch in text):
+            return "ar"
+        return "en"
+
+    def answer_rag_question(self, project: Project, query: str, limit: int = 10, language: str = None):
         
         answer, full_prompt, chat_history = None, None, None
         
@@ -99,12 +104,14 @@ class NLPController(BaseController):
 
 
         if not retrieved_documents or len(retrieved_documents) == 0:
-            return answer, full_prompt, chat_history 
+            return answer, full_prompt, chat_history
+
+        language = language or self.detect_language(query)
+        self.template_parser.set_language(language)
 
         system_prompt = self.template_parser.get(
             "rag",
             "system_prompt",
-            
         )
 
        

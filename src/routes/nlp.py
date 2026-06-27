@@ -201,6 +201,7 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
         project = project,
         query = search_request.text,
         limit = search_request.limit,
+        language = search_request.language,
     )
 
     if not answer:
