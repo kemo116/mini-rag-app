@@ -2,6 +2,7 @@ from .LLMenums import LLMEnums
 from .providers import OpenAIProvider, CohereProvider
 from .providers.GeminiProvider import GeminiProvider
 from .providers.GroqProvider import GroqProvider
+from .providers.OllamaProvider import OllamaProvider
 
 class LLMProviderFactory:
     def __init__(self, config): # changed config type hint to handle Settings object
@@ -33,6 +34,14 @@ class LLMProviderFactory:
         if provider == LLMEnums.GROQ.value:
             return GroqProvider(
                 api_key=self.config.GROQ_API_KEY,
+                default_input_max_characters=self.config.INPUT_DEFAULT_MAX_CHARACTERS,
+                default_generation_max_output_tokens=self.config.GENERATION_DEFAULT_MAX_TOKENS,
+                default_temperature=self.config.GENERATION_DEFAULT_TEMPERATURE
+            )
+
+        if provider == LLMEnums.OLLAMA.value:
+            return OllamaProvider(
+                api_url=self.config.OLLAMA_API_URL,
                 default_input_max_characters=self.config.INPUT_DEFAULT_MAX_CHARACTERS,
                 default_generation_max_output_tokens=self.config.GENERATION_DEFAULT_MAX_TOKENS,
                 default_temperature=self.config.GENERATION_DEFAULT_TEMPERATURE

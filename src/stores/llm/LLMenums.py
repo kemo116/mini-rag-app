@@ -5,6 +5,7 @@ class LLMEnums(Enum):
     COHERE = "COHERE"
     GEMINI = "GEMINI"
     GROQ = "GROQ"
+    OLLAMA = "OLLAMA"
 
 class OpenAIEnums(Enum):
     SYSTEM = "system"
