@@ -1,0 +1,9 @@
+# MongoDB data
+docker/mongodb/
+**/*.wt
+**/*.lock
+**/*.turtle
+**/*.bson
+**/journal/
+**/diagnostic.data/
+.env
