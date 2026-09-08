@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    app.db_client = app.mongo_conn[settings.MONGODB_DB]
+    # app.db_client = app.mongo_conn[settings.MONGODB_DB]
 
     llm_provider_factory = LLMProviderFactory(settings)
     vector_db_provider_factory = VectorDBProviderFactory(settings)

@@ -7,12 +7,17 @@ from models.db_schemes import Project
 import json
 
 class NLPController(BaseController):
+
+    # keeps each embed_text call within Cohere's ~96-text batch cap while
+    # drastically cutting the number of API calls (avoids trial-key rate limits)
+    EMBED_BATCH_SIZE = 90
+
     def __init__(self, vectordb_client, generation_client, embedding_client, template_parser):
         super().__init__()
 
         self.vectordb_client = vectordb_client
         self.generation_client = generation_client
-        self.embedding_client = embedding_client  
+        self.embedding_client = embedding_client
         self.template_parser = template_parser
 
     def create_collection_name(self, project_id: str):
@@ -40,11 +45,17 @@ class NLPController(BaseController):
         texts = [c.chunk_text for c in chunks]
         metadata = [c.chunk_metadata for c in chunks]
 
-        vectors = [
-            self.embedding_client.embed_text(text, document_type = DocumentTypeEnum.DOCUMENT.value)
+        vectors = []
+        for i in range(0, len(texts), self.EMBED_BATCH_SIZE):
+            batch_vectors = self.embedding_client.embed_text(
+                texts[i:i + self.EMBED_BATCH_SIZE],
+                document_type = DocumentTypeEnum.DOCUMENT.value,
+            )
 
-            for text in texts 
-        ]
+            if not batch_vectors:
+                return False
+
+            vectors.extend(batch_vectors)
 
         # step3 : create collection if not exists
 

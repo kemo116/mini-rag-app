@@ -65,8 +65,8 @@ class CohereProvider(LLMInterface):
             return None
         return response.text
     
-    def embed_text(self, text: str, document_type: str = None):
-        
+    def embed_text(self, text, document_type: str = None):
+
         if not self.client:
             self.logger.error("OpenAI client is not set")
             return None
@@ -74,22 +74,26 @@ class CohereProvider(LLMInterface):
         if not self.embedding_model_id:
             self.logger.error("Embedding model is not set")
             return None
-        
+
         input_type = CohereEnums.DOCUMENT.value
         if document_type == DocumentTypeEnum.QUERY.value:
             input_type = CohereEnums.QUERY.value
-        
+
+        is_single_text = isinstance(text, str)
+        texts = [text] if is_single_text else text
+
         response = self.client.embed(
             model= self.embedding_model_id,
-            texts = [self.process_text(text)],
+            texts = [self.process_text(t) for t in texts],
             input_type = input_type,
             embedding_types=["float"]
         )
         if not response or not response.embeddings or not response.embeddings.float:
             self.logger.error("Error while embedding text with cohere")
             return None
-        
-        return response.embeddings.float[0]
+
+        vectors = response.embeddings.float
+        return vectors[0] if is_single_text else vectors
 
     def construct_prompt(self, prompt: str, role:str):
         return {

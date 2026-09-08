@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from .BaseDataModel import BaseDataModel
 from .db_schemes import Project
 from .enums.DataBaseEnum import DataBaseEnum
@@ -5,36 +7,35 @@ from bson import ObjectId
 from typing import Optional
 from pymongo import InsertOne
 from .db_schemes import DataChunk
+from sqlalchemy.future import select
 
 class ProjectModel(BaseDataModel):
     def __init__(self, db_client:object):
         super().__init__(db_client)
-        self.collection = self.db_client[DataBaseEnum.Collection_Projects.value]
-    
+        self.collection = db_client
+
     @classmethod
     async def create_instance(cls, db_client: object):
         instance = cls(db_client)
-        await instance.init_collection()
         return instance
 
 
-    async def init_collection(self):
-        all_collections = await self.db_client.list_collection_names()
-        if DataBaseEnum.Collection_Projects.value not in all_collections:
-            self.collection = self.db_client[DataBaseEnum.Collection_Projects.value]
-
-            indexes = Project.get_indexes()
-            for index in indexes:
-                await self.collection.create_index(
-                    index["key"],
-                    name=index["name"],
-                    unique= index["unique"]
-                )
+    
                 
     async def create_project(self, project:Project):
-        result = await self.collection.insert_one(project.dict(by_alias=True, exclude_unset=True))
-        project.id = result.inserted_id
+        async with self.db_client() as session:
+            async with session.begin():
+                session.add(project)
+            await session.commit()
+            await session.refresh(project)
+
         return project
+
+
+
+        # result = await self.collection.insert_one(project.dict(by_alias=True, exclude_unset=True))
+        # project.project_id = result.inserted_id
+        # return project
     
     async def update_project(self, project_id: ObjectId, update_data: dict):
         return await self.collection.update_one(
@@ -43,36 +44,46 @@ class ProjectModel(BaseDataModel):
         )
     async def get_project_or_create_one(self, project_id:str):
         
-        record = await self.collection.find_one({
-            "project_id": project_id
+        async with self.db_client() as session:
+            async with session.begin():
+                query = select(Project).where(Project.project_id == project_id)
+                result = await session.execute(query)
+                project = result.scalar_one_or_none()
 
-        })
-        if record is None:
-            #create_project
-            project = Project(
-                project_id = project_id
-            )
-            project = await self.create_project(project= project)
-            return project
-        return Project(**record)
+                if project is None:
+                    project_rec = Project(
+                        project_id = project_id
+                    )
+                    project = await self.create_project(project= project_rec)
+
+                    return project
+                else:
+                    return project
+
+
+        
+
+    
+
+    
     async def get_all_projects(self, page:int, page_size:int=10):
-        #count total number of documents
-        total_documents = await self.collection.count_documents({})
-        total_pages = total_documents // page_size
-        if total_documents % page_size > 0:
-            total_pages += 1
-        cursor = self.collection.find().skip((page - 1) * page_size).limit(page_size)
-        projects = []
-        async for document in cursor:
-            project = Project(**document)
-            projects.append(project)
-        return projects
-    async def insert_many_chunks(self, chunks:list[DataChunk], batch_size: int = 100):
-        for i in range(0, len(chunks), batch_size):
-            batch = chunks[i: i+batch_size]
-            operations = [
-                InsertOne(chunk.dict())
-                for chunk in batch
-            ]
-            await self.collection.bulk_write(operations)
-        return len(chunks)
+        async with self.db_client() as session:
+            async with session.begin():
+                total_documents = await session.execute(
+                    select(func.count(Project.project_id))
+                ).scalar()
+
+                total_documents = total_documents.scalar_one()
+
+                total_pages = (total_documents) // page_size
+                if total_documents % page_size != 0:
+                    total_pages += 1
+
+                query = select(Project).offset((page - 1) * page_size).limit(page_size)
+                projects = await session.execute(query).scalars().all()
+
+                return {
+                    "projects": projects,
+                    "total_pages": total_pages,
+                    "current_page": page
+                }

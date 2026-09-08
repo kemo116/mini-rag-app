@@ -72,7 +72,7 @@ async def upload_data(request: Request, project_id: int, file: UploadFile, app_s
         db_client = request.app.db_client
     )
     asset_resource = Asset(
-        asset_project_id = project.id,
+        asset_project_id = project.project_id,
         asset_type = AssetTypeEnum.FILE.value,
         asset_name = file_id,
         asset_size = os.path.getsize(file_path)
@@ -84,7 +84,7 @@ async def upload_data(request: Request, project_id: int, file: UploadFile, app_s
     return JSONResponse(
         content={
             "signal": ResponseSignalEnum.FILE_UPLAOD_SUCCESS.value,
-            "file_id": str(asset_record.id),
+            "file_id": str(asset_record.asset_id),
             # "project_id": str(project._id)
         } 
     )
@@ -106,7 +106,7 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
         )
     if process_request.file_id:
         asset_record = await asset_model.get_asset_record(
-            asset_project_id=project.id,
+            asset_project_id=project.project_id,
             asset_name=process_request.file_id
         )
 
@@ -119,19 +119,19 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
             )
 
         project_file_ids = {
-            asset_record.id: asset_record.asset_name
+            asset_record.asset_id: asset_record.asset_name
         }
     
     else:
         
 
         project_files = await asset_model.get_all_project_assets(
-            asset_project_id=project.id,
+            asset_project_id=project.project_id,
             asset_type=AssetTypeEnum.FILE.value,
         )
 
         project_file_ids = {
-            record.id : record.asset_name
+            record.asset_id : record.asset_name
             for record in project_files
         }
 
@@ -139,7 +139,7 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={
-                "signal": ResponseSignal.NO_FILES_ERROR.value,
+                "signal": ResponseSignalEnum.NO_FILES_ERROR.value,
             }
         )
 
@@ -150,7 +150,7 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
             db_client = request.app.db_client
         )
     if do_reset==1:
-        await chunk_model.delete_chunks_by_project_id(project_id = project.id)
+        await chunk_model.delete_chunks_by_project_id(project_id = project.project_id)
 
     for asset_id, file_id in project_file_ids.items():
         file_content = process_controller.get_file_content(file_id = file_id)
@@ -189,7 +189,7 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
                 chunk_text = chunk.page_content,
                 chunk_order = i+1,
                 chunk_metadata = chunk.metadata,
-                chunk_project_id = project.id,
+                chunk_project_id = project.project_id,
                 chunk_asset_id = asset_id,
             )
             for i, chunk in enumerate(chunks)

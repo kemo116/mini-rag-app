@@ -72,22 +72,26 @@ class OllamaProvider(LLMInterface):
             self.logger.error(f"Ollama generation error: {e}")
             return None
 
-    def embed_text(self, text: str, document_type: str = None):
+    def embed_text(self, text, document_type: str = None):
         if not self.embedding_model_id:
             self.logger.error("Embedding model is not set")
             return None
 
+        is_single_text = isinstance(text, str)
+        texts = [text] if is_single_text else text
+
         try:
             response = self.client.embeddings.create(
                 model=self.embedding_model_id,
-                input=text
+                input=[self.process_text(t) for t in texts]
             )
 
             if not response or not response.data or len(response.data) == 0:
                 self.logger.error("Embedding response is not valid")
                 return None
 
-            return response.data[0].embedding
+            vectors = [d.embedding for d in response.data]
+            return vectors[0] if is_single_text else vectors
 
         except Exception as e:
             self.logger.error(f"Ollama embedding error: {e}")

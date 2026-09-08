@@ -20,7 +20,6 @@ class Settings(BaseSettings):
     COHERE_API_KEY: str = None
     OPENAI_API_URL: str = None
     OPENAI_API_KEY: str = None
-    GEMINI_API_KEY: str = None
     GROQ_API_KEY: str = None
     OLLAMA_API_URL: str = None
 

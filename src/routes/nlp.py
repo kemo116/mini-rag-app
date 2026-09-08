@@ -38,7 +38,7 @@ async def index_project(request: Request, project_id: int, push_request: PushReq
     
     if not project:
         return JSONResponse(
-            status_code= status.HTTP_404_BAD_REQUEST,
+            status_code= status.HTTP_404_NOT_FOUND,
             content= {
                 "signal": ResponseSignalEnum.PROJECT_NOT_FOUND_ERROR.value,
             }
@@ -57,7 +57,7 @@ async def index_project(request: Request, project_id: int, push_request: PushReq
     idx = 0
     while has_records:
         page_chunks = await chunk_model.get_project_chunks(
-            project_id = project.id, page_no=page_no
+            project_id = project.project_id, page_no=page_no
         )
         if len(page_chunks):
             page_no+=1
@@ -78,7 +78,7 @@ async def index_project(request: Request, project_id: int, push_request: PushReq
 
         if not is_inserted:
             return JSONResponse(
-                status_code= status.HTTP_400_INTERNAL_SERVER_ERROR,
+                status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content= {
                     "signal": ResponseSignalEnum.INSERT_INTO_VECTORDB_ERROR.value,
                 }
@@ -163,7 +163,7 @@ async def search_index(request: Request, project_id: int, search_request: Search
 
     if not search_results:
         return JSONResponse(
-            status_code= status.HTTP_400_INTERNAL_SERVER_ERROR,
+            status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,
             content= {
                 "signal": ResponseSignalEnum.SEARCH_VECTORDB_ERROR.value,
             }

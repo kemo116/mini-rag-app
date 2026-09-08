@@ -70,12 +70,12 @@ class QdrantDB(VectorDBInterface):
         if not self.is_collection_existed(collection_name):
             self.logger.error(f"Can not inset new record to non-existed collection: {collection_name}")
             return False
-        try: 
-            _ = self.client.upload_records(
+        try:
+            _ = self.client.upsert(
                 collection_name=collection_name,
-                records=[
-                    models.Record(
-                        id = [record_id],
+                points=[
+                    models.PointStruct(
+                        id = record_id,
                         vector=vector,
                         payload={
                             "text": text,
@@ -102,25 +102,26 @@ class QdrantDB(VectorDBInterface):
 
         for i in range(0, len(texts), batch_size):
             batch_end = i + batch_size
-            batch_texts = vectors[i:]
+            batch_vectors = vectors[i:batch_end]
+            batch_texts = texts[i:batch_end]
             batch_metadata = metadata[i:batch_end]
             batch_record_ids = record_ids[i:batch_end]
-            batch_records = [
+            batch_points = [
 
-                models.Record(
+                models.PointStruct(
                     id = batch_record_ids[x],
-                    vector=batch_texts[x],
+                    vector=batch_vectors[x],
                     payload={
-                        "text": texts[x],
+                        "text": batch_texts[x],
                         "metadata": batch_metadata[x]
                     }
                 )
-                for x in range(len(batch_texts))
+                for x in range(len(batch_vectors))
             ]
             try:
-                _ = self.client.upload_records(
+                _ = self.client.upsert(
                     collection_name=collection_name,
-                    records=batch_records 
+                    points=batch_points
                 )
             except Exception as e:
                 self.logger.info(f"Error while inserting batch: {e}")
@@ -130,15 +131,15 @@ class QdrantDB(VectorDBInterface):
     
     def search_by_vector(self, collection_name: str, vector: list, limit: int):
 
-        results = self.client.search(
+        results = self.client.query_points(
             collection_name = collection_name,
-            query_vector = vector,
+            query = vector,
             limit=limit
-        )
+        ).points
 
         if not results or len(results) == 0:
             return None
-        
+
         return [
 
             RetrievedDocument(**{
