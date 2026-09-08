@@ -24,7 +24,7 @@ data_router = APIRouter(
 )
 
 @data_router.post("/upload/{project_id}")
-async def upload_data(request: Request, project_id: str, file: UploadFile, app_settings: Settings = Depends(get_settings)):
+async def upload_data(request: Request, project_id: int, file: UploadFile, app_settings: Settings = Depends(get_settings)):
     # VALIDATE file properties
     
     project_model =  await ProjectModel.create_instance(
@@ -89,7 +89,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile, app_s
         } 
     )
 @data_router.post("/process/{project_id}")
-async def process_endpoint(request: Request, project_id: str, process_request: ProcessRequest):
+async def process_endpoint(request: Request, project_id: int, process_request: ProcessRequest):
     data_controller = DataController()
     project_file_ids = {}
     do_reset = process_request.do_reset

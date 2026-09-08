@@ -5,8 +5,13 @@ class Settings(BaseSettings):
     APP_NAME: str
     APP_VERSION: str
     CHUNK_SIZE: int
-    MONGODB_URL: str
-    MONGODB_DB: str
+
+    POSTGRESS_USERNAME: str
+    POSTGRESS_PASSWORD: str
+    POSTGRESS_MAIN_DATABASE: str
+    POSTGRESS_HOST: str
+    POSTGRESS_PORT: int
+
     FILE_MAX_SIZE: int
     FILE_ALLOWED_EXTENSIONS: list
     GENERATION_BACKEND: str
