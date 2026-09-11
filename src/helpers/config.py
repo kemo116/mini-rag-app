@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = None
     OLLAMA_API_URL: str = None
 
+    GENERATION_MODEL_ID_LITERAL= "gpt-4o-mini"
     GENERATION_MODEL_ID: str = None
     EMBEDDING_MODEL_ID: str = None
     EMBEDDING_MODEL_SIZE: int = None

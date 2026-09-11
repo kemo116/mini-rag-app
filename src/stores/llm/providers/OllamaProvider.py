@@ -36,7 +36,7 @@ class OllamaProvider(LLMInterface):
     def construct_prompt(self, prompt: str, role: str):
         return {
             "role": role,
-            "content": self.process_text(prompt)
+            "content": prompt
         }
 
     def generate_text(self, prompt: str, chat_history: list = None, max_output_tokens: int = None, temperature: float = None):

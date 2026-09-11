@@ -14,3 +14,5 @@ SQLAlchemy==2.1.0rc1
 asyncpg
 alembic
 psycopg2-binary
+pgvector
+nltk
