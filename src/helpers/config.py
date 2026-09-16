@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
 import motor.motor_asyncio
 
 class Settings(BaseSettings):
@@ -17,23 +18,26 @@ class Settings(BaseSettings):
     GENERATION_BACKEND: str
     EMBEDDING_BACKEND: str
     
-    COHERE_API_KEY: str = None
-    OPENAI_API_URL: str = None
-    OPENAI_API_KEY: str = None
-    GROQ_API_KEY: str = None
-    OLLAMA_API_URL: str = None
+    COHERE_API_KEY: Optional[str] = None
+    OPENAI_API_URL: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
+    GROQ_API_KEY: Optional[str] = None
+    OLLAMA_API_URL: Optional[str] = None
 
-    GENERATION_MODEL_ID_LITERAL= "gpt-4o-mini"
-    GENERATION_MODEL_ID: str = None
-    EMBEDDING_MODEL_ID: str = None
-    EMBEDDING_MODEL_SIZE: int = None
-    INPUT_DEFAULT_MAX_CHARACTERS: int = None
-    GENERATION_DEFAULT_MAX_TOKENS: int = None 
-    GENERATION_DEFAULT_TEMPERATURE: float = None
+    GENERATION_MODEL_ID_LITERAL: list = []
+    GENERATION_MODEL_ID: Optional[str] = None
+    EMBEDDING_MODEL_ID: Optional[str] = None
+    EMBEDDING_MODEL_SIZE: Optional[int] = None
+    INPUT_DEFAULT_MAX_CHARACTERS: Optional[int] = None
+    GENERATION_DEFAULT_MAX_TOKENS: Optional[int] = None
+    GENERATION_DEFAULT_TEMPERATURE: Optional[float] = None
 
+
+    VECTOR_DB_BACKEND_LITERAL: list = []
     VECTOR_DB_BACKEND: str = "QDRANT"
     VECTOR_DB_PATH: str = "qdrant_db"
     VECTOR_DB_DISTANCE_METHOD: str = "cosine"
+    VECTOR_DB_PGVEC_INDEX_THRESHOLD: int = 100
     PRIMARY_LANG: str = "en"
     DEFAULT_LANG: str = "en"
 

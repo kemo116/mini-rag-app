@@ -16,3 +16,6 @@ alembic
 psycopg2-binary
 pgvector
 nltk
+prometheus-client
+starlette-exporter
+fastapi-health

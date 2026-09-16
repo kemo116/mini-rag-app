@@ -56,3 +56,5 @@ $ sudo docker compose up -d
 $ cp .env.example .env
 
 - update `.env` with your credentials
+
+ngrok http 11434

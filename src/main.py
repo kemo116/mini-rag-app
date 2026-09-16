@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     # app.db_client = app.mongo_conn[settings.MONGODB_DB]
 
     llm_provider_factory = LLMProviderFactory(settings)
-    vector_db_provider_factory = VectorDBProviderFactory(settings)
+    vector_db_provider_factory = VectorDBProviderFactory(settings, db_client=app.db_client)
 
     app.generation_client = llm_provider_factory.create(provider=settings.GENERATION_BACKEND)
     app.generation_client.set_generation_model(model_id= settings.GENERATION_MODEL_ID)
@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
     app.embedding_client.set_embedding_model(model_id=settings.EMBEDDING_MODEL_ID, embedding_size=settings.EMBEDDING_MODEL_SIZE)
 
     app.vector_db_client = vector_db_provider_factory.create(provider=settings.VECTOR_DB_BACKEND)
-    app.vector_db_client.connect()
+    await app.vector_db_client.connect()
     app.template_parser = TemplateParser(default_language=settings.PRIMARY_LANG, language=settings.DEFAULT_LANG)
     
     yield  # <-- This tells FastAPI the app is ready and to start accepting requests

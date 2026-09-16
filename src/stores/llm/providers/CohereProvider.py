@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from ..LLMinterface import LLMInterface
 from ..LLMenums import CohereEnums, DocumentTypeEnum
 import logging
@@ -65,11 +67,14 @@ class CohereProvider(LLMInterface):
             return None
         return response.text
     
-    def embed_text(self, text, document_type: str = None):
+    def embed_text(self, text: Union[str, List[str]], document_type: str = None):
 
         if not self.client:
-            self.logger.error("OpenAI client is not set")
+            self.logger.error("Cohere client is not set")
             return None
+
+        if isinstance(text, str):
+            text = [text]
 
         if not self.embedding_model_id:
             self.logger.error("Embedding model is not set")
@@ -92,8 +97,7 @@ class CohereProvider(LLMInterface):
             self.logger.error("Error while embedding text with cohere")
             return None
 
-        vectors = response.embeddings.float
-        return vectors[0] if is_single_text else vectors
+        return [f for f in response.embeddings.float]
 
     def construct_prompt(self, prompt: str, role:str):
         return {

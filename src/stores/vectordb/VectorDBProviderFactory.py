@@ -1,19 +1,33 @@
+from stores.vectordb.providers.PGVectorProvider import PgVectorProvider
+
 from .providers import QdrantDB
 from .VectorDBEnums import VectorDBEnums
 from controllers.BaseController import BaseController
+from sqlalchemy.orm import sessionmaker
+
 
 class VectorDBProviderFactory:
-    def __init__(self, config):
+    def __init__(self, config, db_client: sessionmaker=None):
         self.config = config
         self.base_controller = BaseController()
-
+        self.db_client=db_client
 
     def create(self, provider: str):
         if provider == VectorDBEnums.QDRANTDB.value:
-            db_path = self.base_controller.get_database_path(db_name = self.config.VECTOR_DB_PATH)
+            qdrant_db_path = self.base_controller.get_database_path(db_name = self.config.VECTOR_DB_PATH)
             return QdrantDB(
-                db_path = self.config.VECTOR_DB_PATH,
-                distance_method=self.config.VECTOR_DB_DISTANCE_METHOD
+                db_path = qdrant_db_path,
+                distance_method=self.config.VECTOR_DB_DISTANCE_METHOD,
+                default_vector_size=self.config.EMBEDDING_MODEL_SIZE,
+                index_threshold=self.config.VECTOR_DB_PGVEC_INDEX_THRESHOLD,
+            )
+
+        if provider == VectorDBEnums.PGVECTOR.value:
+            return PgVectorProvider(
+                db_client=self.db_client,
+                distance_method=self.config.VECTOR_DB_DISTANCE_METHOD,
+                default_vector_size=self.config.EMBEDDING_MODEL_SIZE,
+                index_threshold=self.config.VECTOR_DB_PGVEC_INDEX_THRESHOLD,
             )
         
         return None
