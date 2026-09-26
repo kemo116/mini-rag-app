@@ -41,4 +41,10 @@ class AssetModel(BaseDataModel):
             stmt = select(Asset).where(Asset.asset_project_id == asset_project_id, Asset.asset_name == asset_name)
             result = await session.execute(stmt)
             record = result.scalar_one_or_none()
+
+            # the upload endpoint returns the asset's database id as "file_id", so fall back to it
+            if record is None and str(asset_name).isdigit():
+                stmt = select(Asset).where(Asset.asset_project_id == asset_project_id, Asset.asset_id == int(asset_name))
+                result = await session.execute(stmt)
+                record = result.scalar_one_or_none()
             return record

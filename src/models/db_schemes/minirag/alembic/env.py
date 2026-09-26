@@ -1,6 +1,8 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
+from sqlalchemy.engine import URL
 from sqlalchemy import pool
 from schemes import SQLAlchemyBase
 
@@ -58,8 +60,21 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    section = config.get_section(config.config_ini_section, {})
+
+    # Inside Docker the DB settings come from the environment, not alembic.ini
+    if os.getenv("POSTGRESS_HOST"):
+        section["sqlalchemy.url"] = URL.create(
+            "postgresql+psycopg2",
+            username=os.getenv("POSTGRESS_USERNAME"),
+            password=os.getenv("POSTGRESS_PASSWORD"),
+            host=os.getenv("POSTGRESS_HOST"),
+            port=int(os.getenv("POSTGRESS_PORT", "5432")),
+            database=os.getenv("POSTGRESS_MAIN_DATABASE"),
+        ).render_as_string(hide_password=False)
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

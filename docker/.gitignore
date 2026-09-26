@@ -7,3 +7,7 @@ docker/mongodb/
 **/journal/
 **/diagnostic.data/
 .env
+prometheus/grafana_cloud_api_key
+prometheus/gc_token
+env/.env*
+env/.env.example.*

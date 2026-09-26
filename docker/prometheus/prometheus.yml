@@ -1,0 +1,41 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Push metrics to Grafana Cloud (the dashboard uses the grafanacloud-prom datasource).
+# Fill url/username from Grafana Cloud -> your stack -> Prometheus -> "Send Metrics".
+# The API key goes in docker/prometheus/grafana_cloud_api_key (gitignored, no trailing newline).
+remote_write:
+  - url: https://prometheus-prod-58-prod-eu-central-0.grafana.net/api/prom/push
+    basic_auth:
+      username: 3613126
+      password_file: /etc/prometheus/secrets/gc_token
+
+scrape_configs:
+
+  - job_name: 'fastapi'
+    static_configs:
+      - targets: ['fastapi:8000']
+    metrics_path: '/metrics'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: '/metrics'
+
+  - job_name: 'qdrant'
+    static_configs:
+      - targets: ['qdrant:6334']
+    metrics_path: '/metrics'
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    metrics_path: '/metrics'
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    metrics_path: '/metrics'
+
+  
